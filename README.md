@@ -36,7 +36,7 @@
 1. Install tailwindcss
 
 ```
-    npm install -D tailwindcss
+    npm install -D tailwindcss postcss autoprefixer
 ```
 
 2. Create tailwind config file
