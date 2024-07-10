@@ -4,6 +4,8 @@ import { BsPersonCircle } from "react-icons/bs";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import {toast} from "react-hot-toast"
+import { createAccount } from "../Redux/Slices/AuthSlice";
+import { log10 } from "chart.js/helpers";
 
 function Signup() {
   const dispatch = useDispatch();
@@ -39,36 +41,66 @@ function Signup() {
       const fileReader = new FileReader();
       fileReader.readAsDataURL(uploadImage);
       fileReader.addEventListener("load", function () {
+        
         setPreviewImage(this.result);
       });
     }
   }
 
-  function createNewAccount(e){
-  e.preventDefault();
-  if(!signupdata.email || !signupdata.password|| !signupdata.fullName|| !signupdata.avatar){
-    toast.error("Please enter all the details");
-    return;
-  }
-
-  // check name field length
-  if(signupdata.fullName.length<5){
-    toast.error("Name should be atleast of 5 characters");
-    return;
+  function createNewAccount(e) {
+    e.preventDefault();
+  
+    if (!signupdata.email || !signupdata.password || !signupdata.fullName || !signupdata.avatar) {
+      toast.error("Please enter all the details");
+      return;
+    }
+  
+    // Validate name length
+    if (signupdata.fullName.length < 5) {
+      toast.error("Name should be at least 5 characters long");
+      return;
+    }
+  
+    // Validate email format
+    if (!signupdata.email.match(/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/)) {
+      toast.error("Invalid email ID");
+      return;
+    }
+  
+    // Validate password format
+    if (!signupdata.password.match(/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/)) {
+      toast.error("Password should be 6-16 characters long with at least one number and one special character");
+      return;
+    }
+  
+    const formData = new FormData();
+    formData.append("fullName", signupdata.fullName);
+    formData.append("email", signupdata.email);
+    formData.append("password", signupdata.password);
+    formData.append("avatar", signupdata.avatar); // Make sure avatar is correctly appended as a file
+  
+    // Dispatch create account action
+    dispatch(createAccount(formData))
+      .then((response) => {
+        if (response?.payload?.success) {
+          console.log(response);
+          console.log(response.payload.user);
+          navigate("/"); // Navigate to homepage on successful account creation
+          setSignupdata({
+            fullName: "",
+            email: "",
+            password: "",
+            avatar: "",
+          });
+          setPreviewImage("");
+        }
+      })
+      .catch((error) => {
+        console.error("Error creating account:", error);
+        toast.error("Failed to create account. Please try again later.");
+      });
   }
   
-  //checking valid email
-   if(!signupdata.email.match(/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-   )){
-    toast.error("Invalid email Id")
-   }
-
-   //checking valid password
-   if(!signupdata.password.match(/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/
-   )){
-    toast.error("Password should be 6-16 character long with atleast a number and special character")
-   }
-  }
   return (
     <HomeLayout>
       <div className="flex items-center justify-center h-[90vh]">
