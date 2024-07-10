@@ -30,8 +30,8 @@ function HomeLayout({ children }) {
  
   function handleLogout() {
     e.preventDefault();
-   // const res=await dispatch(logout());
-  // if(res?.payload?.success)
+   const res= dispatch(logout());
+  if(res?.payload?.success)
     navigate('/');
   }
   return (
@@ -90,11 +90,11 @@ function HomeLayout({ children }) {
            {isLoggedIn && (
               <li className="bottom-4 absolute w-[90%]">
               <div className="flex items-center justify-center w-full">
-                <button className="w-full px-4 py-1 font-semibold rounded-md btn-primary">
+                <button className="w-full px-4 py-1 font-semibold rounded-md btn-primary bg-slate-100">
                   <Link to="/user/profile">Profile</Link>
                 </button>
 
-                <button className="w-full px-4 py-1 font-semibold rounded-md btn-secondary">
+                <button className="w-full px-4 py-1 font-semibold rounded-md btn-secondary bg-slate-100">
                   <Link onClick={handleLogout}>Logout</Link>
                 </button>
               </div>
