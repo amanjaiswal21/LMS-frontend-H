@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
 import Footer from "../Components/Footer.jsx";
+import { logout } from "../Redux/Slices/AuthSlice.js";
 
 function HomeLayout({ children }) {
   const dispatch = useDispatch();
@@ -28,12 +29,16 @@ function HomeLayout({ children }) {
     drawerSide[0].style.width = '0';
   }
  
-  function handleLogout() {
+ async function handleLogout(e) {
+    
     e.preventDefault();
-   const res= dispatch(logout());
+    
+   const res=  dispatch(logout());
+  
   if(res?.payload?.success)
     navigate('/');
   }
+
   return (
     <div className="min-h-[90vh]">
       <div className="absolute left-0 z-50 drawer w-fit">
