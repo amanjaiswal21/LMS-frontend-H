@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import {toast} from "react-hot-toast"
 import { createAccount } from "../Redux/Slices/AuthSlice";
-import { log10 } from "chart.js/helpers";
+import { isEmail, isPassword } from "../Helpers/regexMatcher";
 
 function Signup() {
   const dispatch = useDispatch();
@@ -61,14 +61,15 @@ function Signup() {
       return;
     }
   
-    // Validate email format
-    if (!signupdata.email.match(/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/)) {
+    // Validate email format 
+    //function in helper
+    if (!isEmail(signupdata.email)) {
       toast.error("Invalid email ID");
       return;
     }
   
     // Validate password format
-    if (!signupdata.password.match(/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/)) {
+    if (!isPassword(signupdata.password)) {
       toast.error("Password should be 6-16 characters long with at least one number and one special character");
       return;
     }
@@ -83,9 +84,7 @@ function Signup() {
     dispatch(createAccount(formData))
       .then((response) => {
         if (response?.payload?.success) {
-          console.log(response);
-          console.log(response.payload.user);
-          navigate("/"); // Navigate to homepage on successful account creation
+          navigate("/"); 
           setSignupdata({
             fullName: "",
             email: "",

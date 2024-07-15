@@ -9,16 +9,38 @@ const initialState = {
 
 export const getAllCourses=createAsyncThunk("/course/get",async()=>{
     try {
-        const response=axiosInstance.get("/courses");
+        const response= axiosInstance.get("/courses");
         toast.promise(response,{
-            loading:"loadin course data...",
+            loading:"loading course data...",
             success:"Courses loaded successfully",
             error:"Failed to get courses"
         })
-        return (await response).data.courses;
+        return ( await response).data.courses;
     } catch (error) {
         toast.error(error?.response?.data?.message)
     }
+})
+
+export const createNewCourse=createAsyncThunk("/course/create",async(data)=>{
+ try {
+    let formData=new FormData();
+    formData.append("title",data?.title);
+    formData.append("description",data?.description);
+    formData.append("category",data?.category);
+    formData.append("createdBy",data?.createdBy);
+    formData.append("thumbnail",data?.thumbnail);
+   
+    const response=axiosInstance.post("/courses",formData);
+    toast.promise(response,{
+        loading:"Creating new course...",
+        success:"Courses created successfully",
+        error:"Failed to create courses"
+    })
+    return ( await response).data;
+    
+ } catch (error) {
+    toast.error(error?.response?.data?.message);
+ }
 })
 // Define the course slice
 const courseSlice = createSlice({
@@ -26,9 +48,13 @@ const courseSlice = createSlice({
     initialState,
     reducers: {}, 
     extraReducers: (builder) => {
-      
+    builder.addCase(getAllCourses.fulfilled,(state,action)=>{
+    if(action.payload){
+        state.courseData =[...action.payload];
+    }
+})
     }
 });
 
-// Export the reducer to be used in the store
+
 export default courseSlice.reducer;

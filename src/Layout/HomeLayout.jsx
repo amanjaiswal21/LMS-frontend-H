@@ -12,10 +12,8 @@ function HomeLayout({ children }) {
 
   // for checking if the user is logged in
   const isLoggedIn = useSelector((state) => state?.auth?.isLoggedIn);
-
   // for displaying the option according to the role
   const role = useSelector((state) => state?.auth?.role);
-
   function changeWidth() {
     const drawerSide = document.getElementsByClassName('drawer-side');
     drawerSide[0].style.width = 'auto';
@@ -40,6 +38,7 @@ function HomeLayout({ children }) {
   }
 
   return (
+    
     <div className="min-h-[90vh]">
       <div className="absolute left-0 z-50 drawer w-fit">
         <input type="checkbox" id="my-drawer" className="drawer-toggle" />

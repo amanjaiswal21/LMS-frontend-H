@@ -5,12 +5,12 @@ import axiosInstance from "../../Helpers/axiosInstance.js";
 const initialState = {
   isLoggedIn: localStorage.getItem('isLoggedIn') || false,
   role: localStorage.getItem('role') || "",
-  data: JSON.parse(localStorage.getItem('data')) || {}, // Ensure data is parsed correctly
+  data: JSON.parse(localStorage.getItem('data')) || {}, 
 };
 
 export const createAccount = createAsyncThunk("/auth/signup", async (data) => {
   try {
-    const res = await axiosInstance.post("user/register", data);
+    const res =  axiosInstance.post("user/register", data);
     toast.promise(res, {
       loading: "Wait! Creating your account...", // Fixed typo and improved message
       success: (data) => {
@@ -19,7 +19,7 @@ export const createAccount = createAsyncThunk("/auth/signup", async (data) => {
       error: "Failed to create your account"
     });
 
-    return res.data;
+    return (await res).data;
   } catch (error) {
     toast.error(error?.response?.data?.message);
   }
@@ -64,6 +64,14 @@ const authSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
+      .addCase(createAccount.fulfilled, (state, action) => {
+        localStorage.setItem("data", JSON.stringify(action?.payload?.user)); 
+        localStorage.setItem("isLoggedIn", true);
+        localStorage.setItem("role", action?.payload?.user?.role); 
+        state.isLoggedIn = true;
+        state.data = action?.payload?.user;
+        state.role = action?.payload?.user?.role;
+      })
       .addCase(login.fulfilled, (state, action) => {
         localStorage.setItem("data", JSON.stringify(action?.payload?.user)); // Store user data in local storage
         localStorage.setItem("isLoggedIn", true); // Set isLoggedIn flag in local storage
@@ -73,7 +81,7 @@ const authSlice = createSlice({
         state.role = action?.payload?.user?.role;
       })
       .addCase(logout.fulfilled, (state) => {
-        localStorage.clear(); // Clear all local storage on logout
+        localStorage.clear();
         state.data = {};
         state.isLoggedIn = false;
         state.role = "";
