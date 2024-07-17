@@ -2,10 +2,18 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import toast from "react-hot-toast";
 import axiosInstance from "../../Helpers/axiosInstance.js";
 
+const parseJSON = (value) => {
+  try {
+    return JSON.parse(value);
+  } catch (e) {
+    return {};
+  }
+};
+
 const initialState = {
   isLoggedIn: localStorage.getItem('isLoggedIn') || false,
   role: localStorage.getItem('role') || "",
-  data: JSON.parse(localStorage.getItem('data')) || {}, 
+  data: localStorage.getItem('data') ? parseJSON(localStorage.getItem('data')) : {}
 };
 
 export const createAccount = createAsyncThunk("/auth/signup", async (data) => {
@@ -58,6 +66,33 @@ export const logout = createAsyncThunk("/auth/logout", async () => {
   }
 });
 
+
+export const updateProfile = createAsyncThunk("/user/update/profile", async ({ id, data }) => {
+  try {
+    const res = axiosInstance.put(`user/update/${id}`,data); 
+    toast.promise(res, {
+      loading: "Wait! profile update in progress...", 
+      success: (data) => {
+        return data?.data?.message || "User profile updated successfully"; 
+      },
+      error: "Failed to update profile"
+    });
+    return (await res).data;
+  } catch (error) {
+    toast.error(error?.response?.data?.message);
+  }
+});
+
+
+export const getUserData = createAsyncThunk("/user/details", async () => {
+  try {
+    const res = axiosInstance.get("user/me"); 
+    return (await res).data;
+  } catch (error) {
+    toast.error(error?.message);
+  }
+});
+
 const authSlice = createSlice({
   name: 'auth',
   initialState: initialState,
@@ -85,7 +120,16 @@ const authSlice = createSlice({
         state.data = {};
         state.isLoggedIn = false;
         state.role = "";
-      });
+      })
+      .addCase(getUserData.fulfilled, (state, action) => {
+        if(!action?.payload?.user) return;
+        localStorage.setItem("data", JSON.stringify(action?.payload?.user)); // Store user data in local storage
+        localStorage.setItem("isLoggedIn", true); // Set isLoggedIn flag in local storage
+        localStorage.setItem("role", action?.payload?.user?.role); // Store user role in local storage
+        state.isLoggedIn = true;
+        state.data = action?.payload?.user;
+        state.role = action?.payload?.user?.role;
+      })
   }
 });
 
